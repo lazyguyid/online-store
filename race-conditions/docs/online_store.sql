@@ -16,6 +16,12 @@
 */
 
 
+-- Create SEQUENCES
+CREATE SEQUENCE orderdetailid_seq;
+CREATE SEQUENCE userid_seq;
+CREATE SEQUENCE productid_seq;
+CREATE SEQUENCE orderid_seq;
+
 -- ----------------------------
 -- Table structure for order_details
 -- ----------------------------
@@ -27,7 +33,7 @@ CREATE TABLE "order_details" (
   "qty" int4 NOT NULL
 )
 ;
-ALTER TABLE "order_details" OWNER TO "postgres";
+ALTER TABLE "order_details" OWNER TO "root";
 
 -- ----------------------------
 -- Records of order_details
@@ -46,7 +52,7 @@ CREATE TABLE "orders" (
   "total" float4
 )
 ;
-ALTER TABLE "orders" OWNER TO "postgres";
+ALTER TABLE "orders" OWNER TO "root";
 
 -- ----------------------------
 -- Records of orders
@@ -68,7 +74,7 @@ CREATE TABLE "products" (
   "price" float4
 )
 ;
-ALTER TABLE "products" OWNER TO "postgres";
+ALTER TABLE "products" OWNER TO "root";
 
 -- ----------------------------
 -- Records of products
@@ -88,7 +94,7 @@ CREATE TABLE "users" (
   "name" varchar(50) COLLATE "pg_catalog"."default"
 )
 ;
-ALTER TABLE "users" OWNER TO "postgres";
+ALTER TABLE "users" OWNER TO "root";
 
 -- ----------------------------
 -- Records of users
