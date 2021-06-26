@@ -11,8 +11,6 @@ services:
         environment:
             POSTGRES_USER: root
             POSTGRES_PASSWORD: password
-            APP_DB_USER: user
-            APP_DB_PASS: pass
-            APP_DB_NAME: online_store
+            POSTGRES_DB: online_store
         volumes:
-            - ./db:/docker-entrypoint-initdb.d/
+            - ./docs/online_store.sql:/docker-entrypoint-initdb.d/online_store.sql
