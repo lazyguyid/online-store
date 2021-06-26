@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . .
 
 RUN apk add gcc musl-dev
-RUN CG_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags -ldflags="-w -s" .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags -ldflags="-w -s" .
 
 FROM busybox
 
