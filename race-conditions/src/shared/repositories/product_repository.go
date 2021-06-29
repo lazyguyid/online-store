@@ -81,6 +81,7 @@ func (pr *productRepo) requestStockOrderWithTrx(params *core.RepoParam) <-chan c
 		defer close(output)
 		product := new(domains.Product)
 		data := params.Data.(map[string]int64)
+		// lock the row with specific condition
 		err := params.Transaction.Clauses(clause.Locking{Strength: "UPDATE"}).Where("id", params.UniqueID).Where(fmt.Sprintf("qty >= %d", data["qty"])).First(&product).Error
 		if err != nil {
 			output <- core.Result{

@@ -71,6 +71,7 @@ func (uc *usecase) Buy(c core.Context, data interface{}) (result core.Result) {
 		})
 
 		if result.Error != nil {
+			tx.Rollback()
 			result.Code = http.StatusBadRequest
 			result.Message = "cannot request stock order"
 			return result
@@ -90,12 +91,14 @@ func (uc *usecase) Buy(c core.Context, data interface{}) (result core.Result) {
 	})
 
 	if result.Error != nil {
+		tx.Rollback()
 		result.Code = http.StatusBadRequest
 		result.Message = "failed to create order"
 		return result
 	}
 
 	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
 		return core.Result{
 			Code:    http.StatusBadRequest,
 			Message: "cannot commit transaction",
