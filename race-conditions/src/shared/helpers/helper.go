@@ -2,9 +2,10 @@ package helpers
 
 import (
 	"fmt"
-	"online-store/core"
 	"runtime"
 	"strings"
+
+	"github.com/lazyguyid/gacor"
 )
 
 // Helper interface
@@ -13,11 +14,11 @@ type Helper interface {
 }
 
 type hp struct {
-	app core.App
+	app gacor.App
 }
 
 // NewHelper func
-func NewHelper(app core.App) Helper {
+func NewHelper(app gacor.App) Helper {
 	helper := new(hp)
 	helper.app = app
 

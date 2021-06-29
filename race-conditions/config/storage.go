@@ -2,18 +2,18 @@ package config
 
 import (
 	"errors"
-	"online-store/core"
 
+	"github.com/lazyguyid/gacor"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 type storage struct {
-	config   core.Config
+	config   gacor.Config
 	postgres *gorm.DB
 }
 
-func NewStorage(app core.App) core.Storage {
+func NewStorage(app gacor.App) gacor.Storage {
 	s := new(storage)
 	s.config = app.Config()
 
@@ -35,7 +35,7 @@ func (s *storage) Postgres() (db *gorm.DB) {
 
 func (s *storage) Begin(engine string) (db *gorm.DB) {
 	switch engine {
-	case core.StorageEngines.Postgres:
+	case gacor.StorageEngines.Postgres:
 		return s.Postgres().Begin()
 	}
 

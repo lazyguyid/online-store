@@ -2,10 +2,10 @@ package repositories
 
 import (
 	"fmt"
-	"online-store/core"
 	"online-store/src/shared/domains"
 	"online-store/src/shared/helpers"
 
+	"github.com/lazyguyid/gacor"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -13,21 +13,21 @@ import (
 type productRepo struct {
 	conn   *gorm.DB
 	helper helpers.Helper
-	fn     map[string]func(params *core.RepoParam) <-chan core.Result
+	fn     map[string]func(params *gacor.RepoParam) <-chan gacor.Result
 }
 
-func NewProductRepository(app core.App) core.CRepository {
+func NewProductRepository(app gacor.App) gacor.CRepository {
 	pr := new(productRepo)
 	pr.conn = app.Storage().Postgres()
 
-	pr.fn = make(map[string]func(params *core.RepoParam) <-chan core.Result)
+	pr.fn = make(map[string]func(params *gacor.RepoParam) <-chan gacor.Result)
 	pr.fn["requestStockOrderWithTrx"] = pr.requestStockOrderWithTrx
 
 	return pr
 }
 
-func (pr *productRepo) Create(rp *core.RepoParam) <-chan core.Result {
-	result := make(chan core.Result)
+func (pr *productRepo) Create(rp *gacor.RepoParam) <-chan gacor.Result {
+	result := make(chan gacor.Result)
 
 	go func() {
 		defer close(result)
@@ -36,8 +36,8 @@ func (pr *productRepo) Create(rp *core.RepoParam) <-chan core.Result {
 	return result
 }
 
-func (pr *productRepo) Get(rp *core.RepoParam) <-chan core.Result {
-	result := make(chan core.Result)
+func (pr *productRepo) Get(rp *gacor.RepoParam) <-chan gacor.Result {
+	result := make(chan gacor.Result)
 
 	go func() {
 		defer close(result)
@@ -47,8 +47,8 @@ func (pr *productRepo) Get(rp *core.RepoParam) <-chan core.Result {
 	return result
 }
 
-func (pr *productRepo) Update(rp *core.RepoParam) <-chan core.Result {
-	result := make(chan core.Result)
+func (pr *productRepo) Update(rp *gacor.RepoParam) <-chan gacor.Result {
+	result := make(chan gacor.Result)
 
 	go func() {
 		defer close(result)
@@ -57,8 +57,8 @@ func (pr *productRepo) Update(rp *core.RepoParam) <-chan core.Result {
 	return result
 }
 
-func (pr *productRepo) Delete(rp *core.RepoParam) <-chan core.Result {
-	result := make(chan core.Result)
+func (pr *productRepo) Delete(rp *gacor.RepoParam) <-chan gacor.Result {
+	result := make(chan gacor.Result)
 
 	go func() {
 		defer close(result)
@@ -67,16 +67,16 @@ func (pr *productRepo) Delete(rp *core.RepoParam) <-chan core.Result {
 	return result
 }
 
-func (pr *productRepo) CustomFunc(params *core.RepoParam) <-chan core.Result {
+func (pr *productRepo) CustomFunc(params *gacor.RepoParam) <-chan gacor.Result {
 	return pr.fn[params.Fn](params)
 }
 
-func (pr *productRepo) requestStockOrderWithTrx(params *core.RepoParam) <-chan core.Result {
+func (pr *productRepo) requestStockOrderWithTrx(params *gacor.RepoParam) <-chan gacor.Result {
 	if params.Transaction == nil {
 		panic("cannot get transaction instance")
 	}
 
-	output := make(chan core.Result, 0)
+	output := make(chan gacor.Result, 0)
 	go func() {
 		defer close(output)
 		product := new(domains.Product)
@@ -84,7 +84,7 @@ func (pr *productRepo) requestStockOrderWithTrx(params *core.RepoParam) <-chan c
 		// lock the row with specific condition
 		err := params.Transaction.Clauses(clause.Locking{Strength: "UPDATE"}).Where("id", params.UniqueID).Where(fmt.Sprintf("qty >= %d", data["qty"])).First(&product).Error
 		if err != nil {
-			output <- core.Result{
+			output <- gacor.Result{
 				Error: err,
 			}
 			return
@@ -97,13 +97,13 @@ func (pr *productRepo) requestStockOrderWithTrx(params *core.RepoParam) <-chan c
 		}).Error
 
 		if err != nil {
-			output <- core.Result{
+			output <- gacor.Result{
 				Error: err,
 			}
 			return
 		}
 
-		output <- core.Result{
+		output <- gacor.Result{
 			Data: product,
 		}
 

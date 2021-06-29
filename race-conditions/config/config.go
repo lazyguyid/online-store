@@ -1,9 +1,10 @@
 package config
 
 import (
-	"online-store/core"
 	"os"
 	"strconv"
+
+	"github.com/lazyguyid/gacor"
 )
 
 type config struct {
@@ -11,7 +12,7 @@ type config struct {
 }
 
 // Load func
-func Load() core.Config {
+func Load() gacor.Config {
 	cfg := new(config)
 	cfg.vars = make(map[string]interface{})
 

@@ -1,6 +1,6 @@
 package order
 
-import "online-store/core"
+import "github.com/lazyguyid/gacor"
 
 // Request struct
 type Request struct {
@@ -13,7 +13,7 @@ type Product struct {
 	Qty int64 `json:"qty"`
 }
 
-func NewOrderRequest() core.Request {
+func NewOrderRequest() gacor.Request {
 	return new(Request)
 }
 

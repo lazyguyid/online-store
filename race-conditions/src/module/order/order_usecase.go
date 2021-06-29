@@ -3,24 +3,25 @@ package order
 import (
 	"errors"
 	"net/http"
-	"online-store/core"
 	"online-store/src/shared/domains"
 	"online-store/src/shared/helpers"
+
+	"github.com/lazyguyid/gacor"
 )
 
 type Usecase interface {
-	Buy(c core.Context, data interface{}) (result core.Result)
+	Buy(c gacor.Context, data interface{}) (result gacor.Result)
 }
 
 type usecase struct {
-	config      core.Config
-	storage     core.Storage
-	productRepo core.CRepository
-	orderRepo   core.CRepository
+	config      gacor.Config
+	storage     gacor.Storage
+	productRepo gacor.CRepository
+	orderRepo   gacor.CRepository
 	helper      helpers.Helper
 }
 
-func NewOrderUsecase(app core.App) Usecase {
+func NewOrderUsecase(app gacor.App) Usecase {
 	uc := new(usecase)
 	uc.config = app.Config()
 	uc.productRepo = app.GetCRepository("product")
@@ -31,14 +32,14 @@ func NewOrderUsecase(app core.App) Usecase {
 	return uc
 }
 
-func (uc *usecase) Buy(c core.Context, data interface{}) (result core.Result) {
+func (uc *usecase) Buy(c gacor.Context, data interface{}) (result gacor.Result) {
 	request := data.(*Request)
 
 	order := new(domains.Order)
 	order.UserID = request.UserID
 
 	// transaction begin
-	tx := uc.storage.Begin(core.StorageEngines.Postgres)
+	tx := uc.storage.Begin(gacor.StorageEngines.Postgres)
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -52,7 +53,7 @@ func (uc *usecase) Buy(c core.Context, data interface{}) (result core.Result) {
 	}()
 
 	if err := tx.Error; err != nil {
-		return core.Result{
+		return gacor.Result{
 			Code:    http.StatusBadRequest,
 			Message: "cannot do transaction",
 			Error:   err,
@@ -61,7 +62,7 @@ func (uc *usecase) Buy(c core.Context, data interface{}) (result core.Result) {
 
 	for _, p := range request.Products {
 		// request stock item for order
-		result = <-uc.productRepo.CustomFunc(&core.RepoParam{
+		result = <-uc.productRepo.CustomFunc(&gacor.RepoParam{
 			Fn:       "requestStockOrderWithTrx",
 			UniqueID: p.ID,
 			Data: map[string]int64{
@@ -85,7 +86,7 @@ func (uc *usecase) Buy(c core.Context, data interface{}) (result core.Result) {
 		})
 	}
 
-	result = <-uc.orderRepo.Create(&core.RepoParam{
+	result = <-uc.orderRepo.Create(&gacor.RepoParam{
 		Data:        order,
 		Transaction: tx,
 	})
@@ -99,7 +100,7 @@ func (uc *usecase) Buy(c core.Context, data interface{}) (result core.Result) {
 
 	if err := tx.Commit().Error; err != nil {
 		tx.Rollback()
-		return core.Result{
+		return gacor.Result{
 			Code:    http.StatusBadRequest,
 			Message: "cannot commit transaction",
 			Error:   err,

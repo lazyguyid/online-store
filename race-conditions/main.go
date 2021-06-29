@@ -5,13 +5,13 @@ import (
 	"os"
 
 	"online-store/config"
-	"online-store/core"
 	"online-store/deps"
 	"online-store/src/module/order"
 	"online-store/src/shared/helpers"
 	"online-store/src/shared/repositories"
 
 	"github.com/joho/godotenv"
+	"github.com/lazyguyid/gacor"
 )
 
 func main() {
@@ -24,7 +24,7 @@ func main() {
 	}
 
 	// load config
-	app := core.Application(config.Load())
+	app := gacor.Application(config.Load())
 	app.SetStorage(config.NewStorage(app))
 
 	// register helper
@@ -37,12 +37,12 @@ func main() {
 
 	oc := order.NewOrderUsecase(app)
 
-	app.Register(&core.ConfigUsecase{
+	app.Register(&gacor.ConfigUsecase{
 		RestPath:      "cart/buy",
 		HTTPMethod:    "POST",
 		Usecase:       oc.Buy,
 		RequestParser: order.NewOrderRequest,
-		Middleware: &core.Middleware{
+		Middleware: &gacor.Middleware{
 			Echo: deps.EchoAuthMiddleware,
 		},
 		Enable: true,
